@@ -5,7 +5,13 @@ import { generateBlob } from '../generators/blob'
 import { generateMesh } from '../generators/mesh'
 import { generateGlass } from '../generators/glass'
 
-const DEVICE_WIDTH = { desktop: '100%', tablet: '834px', mobile: '390px' } as const
+// Real logical viewport sizes per device (width × height). Desktop is fluid width
+// with a laptop-height frame; tablet/mobile use true portrait point dimensions.
+const DEVICE_SIZE = {
+  desktop: { width: '100%', height: '800px' }, // laptop viewport
+  tablet: { width: '834px', height: '1194px' }, // iPad 11" portrait
+  mobile: { width: '390px', height: '844px' }, // iPhone portrait
+} as const
 
 /** The live, exportable preview surface. PNG capture targets this node. */
 const PreviewCanvas = forwardRef<HTMLDivElement>(function PreviewCanvas(_, ref) {
@@ -21,14 +27,14 @@ const PreviewCanvas = forwardRef<HTMLDivElement>(function PreviewCanvas(_, ref) 
   const keyframes = [blobOut.keyframesCss, meshOut.keyframesCss].filter(Boolean).join('\n')
 
   return (
-    <div className="flex h-full items-center justify-center overflow-auto p-6">
+    <div className="flex h-full overflow-auto p-6">
       <div
-        className="relative transition-[width] duration-300 ease-out"
-        style={{ width: DEVICE_WIDTH[device], maxWidth: '100%', height: '100%' }}
+        className="relative m-auto shrink-0 transition-[width,height] duration-300 ease-out"
+        style={{ width: DEVICE_SIZE[device].width, height: DEVICE_SIZE[device].height, maxWidth: '100%' }}
       >
         <div
           ref={ref}
-          className="relative h-full min-h-[420px] w-full overflow-hidden rounded-2xl ring-1 ring-black/20"
+          className="relative h-full w-full overflow-hidden rounded-2xl ring-1 ring-black/20"
           style={{ background: bg === 'blob' ? blobOut.bgColor : '#0a0a12' }}
         >
           {keyframes && <style>{keyframes}</style>}
